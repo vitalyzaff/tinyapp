@@ -24,8 +24,9 @@ app.get('/urls.json', (req, res) => {
 
 // route definition for form submission
 app.post('/urls', (req, res) => {
-  console.log(req.body);
-  res.send('OK');
+  let randomString = generateRandomString();
+  urlDatabase[randomString] = req.body['longURL'];
+  res.redirect(`/urls/${randomString}`);
 });
 
 // new route handler for /urls
