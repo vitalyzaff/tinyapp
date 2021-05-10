@@ -29,6 +29,12 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${randomString}`);
 });
 
+// redirect to longURL
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
 // new route handler for /urls
 app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase };
