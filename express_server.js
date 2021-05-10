@@ -2,8 +2,11 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
-// set ejs as a view engine
+const bodyParser = require('body-parser');
+
+// set ejs as a view engine & set body parser
 app.set("view engine", "ejs");
+app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -15,24 +18,46 @@ app.get('/', (req,res) => {
 });
 
 
-app.get("/urls.json", (req, res) => {
+app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+// route definition for form submission
+app.post('/urls', (req, res) => {
+  console.log(req.body);
+  res.send('OK');
 });
+
 // new route handler for /urls
 app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars);
 });
+
+// GET route to show the form
+app.get('/urls/new', (req, res) => {
+  res.render('urls_new');
+});
+
 // second route and handler to pass in long url and return its shortened form
-app.get("/urls/:shortURL", (req, res) => {
+app.get('/urls/:shortURL', (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
 
+// set server listening on specified port
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+// generating random AlphaNumeric string
+const generateRandomString = function() {
+  const random = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let arr = [];
+  for (let i = 0; i < 6; i++) {
+    arr.push(random[Math.floor(Math.random() * random.length)]);
+  }
+  arr = arr.join('');
+  return arr;
+};
