@@ -3,10 +3,12 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 // set ejs as a view engine & set body parser
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 // url database in form of object
 const urlDatabase = {
@@ -73,6 +75,13 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 app.post('/urls/:shortURL/', (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render('urls_show', templateVars);
+});
+
+// endpoint to /login
+app.post('/login', (req, res) => {
+  const user = req.body.username;
+  res.cookie('username', user);
+  res.redirect('/urls');
 });
 
 // *****************************************************************************************************************************************
