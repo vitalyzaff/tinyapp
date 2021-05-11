@@ -14,6 +14,8 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// *****************************************************************************************************************************************
+
 app.get('/', (req,res) => {
   res.redirect('/urls');
 });
@@ -52,12 +54,30 @@ app.get('/urls/:shortURL', (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
-
+// delete an object key
 app.post('/urls/:shortURL/delete', (req, res) => {
   const { shortURL } = req.params;
   delete urlDatabase[shortURL];
   res.redirect('/urls');
 });
+
+// update the link and redirect to main page
+app.post('/urls/:shortURL/edit', (req, res) => {
+  const { shortURL } = req.params;
+  const { longURL } = req.body;
+  urlDatabase[shortURL] = longURL;
+  res.redirect('/urls');
+});
+
+// link to edit particular link
+app.post('/urls/:shortURL/', (req, res) => {
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  res.render('urls_show', templateVars);
+});
+
+// *****************************************************************************************************************************************
+
+
 
 // set server listening on specified port
 
