@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
 
+// url database in form of object
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -52,6 +53,12 @@ app.get('/urls/:shortURL', (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.post('/urls/:shortURL/delete', (req, res) => {
+  const { shortURL } = req.params;
+  delete urlDatabase[shortURL];
+  res.redirect('/urls');
+});
+
 // set server listening on specified port
 
 app.listen(PORT, () => {
@@ -60,7 +67,7 @@ app.listen(PORT, () => {
 
 // generating random AlphaNumeric string
 const generateRandomString = function() {
-  const random = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  const random = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let arr = [];
   for (let i = 0; i < 6; i++) {
     arr.push(random[Math.floor(Math.random() * random.length)]);
