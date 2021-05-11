@@ -42,18 +42,19 @@ app.get("/u/:shortURL", (req, res) => {
 
 // new route handler for /urls
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { username: req.cookies["username"], urls: urlDatabase };
   res.render('urls_index', templateVars);
 });
 
 // GET route to show the form
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  const templateVars = { username: req.cookies["username"] };
+  res.render('urls_new', templateVars);
 });
 
 // second route and handler to pass in long url and return its shortened form
 app.get('/urls/:shortURL', (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
 // delete an object key
@@ -73,14 +74,19 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 
 // link to edit particular link
 app.post('/urls/:shortURL/', (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  const templateVars = { username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render('urls_show', templateVars);
 });
 
-// endpoint to /login
+// set cookie and pass username to it
 app.post('/login', (req, res) => {
   const user = req.body.username;
   res.cookie('username', user);
+  res.redirect('/urls');
+});
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
   res.redirect('/urls');
 });
 
