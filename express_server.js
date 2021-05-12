@@ -120,9 +120,12 @@ app.get('/register', (req, res) => {
 // submit registration form
 app.post('/register', (req, res) => {
   const randomID = generateRandomString();
+  const result = createUser({ user_id: randomID, email: req.body['email'], password: req.body['password'] }, randomID);
+  if (result.error) {
+    res.status(400);
+    res.send(result.error);
+  }
   res.cookie('user_id', randomID);
-  req.cookies['user_id'];
-  usersDb[randomID] = { user_id: randomID, email: req.body['email'], password: req.body['password'] };
   res.redirect('/urls');
 });
 
@@ -150,28 +153,26 @@ const generateRandomString = function() {
   return arr;
 };
 
-// // Fetch user
-// const fetchUser = (email) => {
-//   for (const user of usersDb) {
-//     if (user.email === email) {
-//       return user;
-//     }
-//   }
-//   return null;
-// };
 
-// // create user
+// 
+const fetchUser = (email) => {
+  const objArr = Object.values(usersDb)
+  for (const user of objArr) {
+    if (user.email === email) {
+      return user;
+    }
+  }
+  return null;
+};
 
-// const createUser = (userParams) => {
-//   if (fetchUser(userParams.email)) {
-//     return { data: null, error: "user already exists" }
-//   }
-//   const { email, password } = userParams;
-
-//   if (!email || !password) {
-//     return { data: null, error: "invalid fields" };
-//   }
-
-//   userDb.push(userParams)
-//   return { data: userParams, error: null }
-// }
+const createUser = (userParams, id) => {
+  if (fetchUser(userParams.email)) {
+    return { data: null, error: "user already exists" };
+  }
+  const { user_id, email, password } = userParams;
+  if (!email || !user_id || !password) {
+    return { data: null, error: "invalid fields" };
+  }
+  usersDb[id] = userParams;
+  return { data: userParams, error: null };
+};
