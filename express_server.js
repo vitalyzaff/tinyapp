@@ -129,6 +129,17 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
+// login page
+app.get('/login', (req, res) => {
+  const id = req.cookies['user_id'];
+  const templateVars = { user_id: usersDb[id] };
+  res.render('urls_login', templateVars);
+});
+
+// sumbit login info
+app.post('/login', (req,res) => {
+  res.redirect('/urls');
+});
 
 
 // *****************************************************************************************************************************************
