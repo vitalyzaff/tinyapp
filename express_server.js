@@ -85,11 +85,17 @@ app.post('/login', (req, res) => {
   res.redirect('/urls');
 });
 
+// logout the user and clear cookies
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
 });
 
+// register form
+app.get('/register', (req, res) => {
+  const templateVars = { username: req.cookies["username"] };
+  res.render('urls_register', templateVars);
+});
 // *****************************************************************************************************************************************
 
 
