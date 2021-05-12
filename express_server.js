@@ -97,13 +97,6 @@ app.post('/urls/:shortURL/', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
-// set cookie and pass username to it
-// app.post('/login', (req, res) => {
-//   const user = req.body.username;
-//   res.cookie('username', user);
-//   res.redirect('/urls');
-// });
-
 // user logout
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
@@ -138,7 +131,14 @@ app.get('/login', (req, res) => {
 
 // sumbit login info
 app.post('/login', (req,res) => {
-  res.redirect('/urls');
+  const result = checkUser({ email: req.body['email'], password: req.body['password'] });
+  if (result.error) {
+    res.status(403);
+    res.send(result.error);
+  } else {
+    res.cookie('user_id', result);
+    res.redirect('/urls');
+  }
 });
 
 
@@ -166,8 +166,8 @@ const generateRandomString = function() {
 
 
 // 
-const fetchUser = (email) => {
-  const objArr = Object.values(usersDb)
+const checkEmail = (email) => {
+  const objArr = Object.values(usersDb);
   for (const user of objArr) {
     if (user.email === email) {
       return user;
@@ -176,8 +176,18 @@ const fetchUser = (email) => {
   return null;
 };
 
+const checkPass = (password) => {
+  const objArr = Object.values(usersDb);
+  for (const user of objArr) {
+    if (user.password === password) {
+      return user.id;
+    }
+  }
+  return null;
+};
+
 const createUser = (userParams, id) => {
-  if (fetchUser(userParams.email)) {
+  if (checkEmail(userParams.email)) {
     return { data: null, error: "user already exists" };
   }
   const { user_id, email, password } = userParams;
@@ -186,4 +196,16 @@ const createUser = (userParams, id) => {
   }
   usersDb[id] = userParams;
   return { data: userParams, error: null };
+};
+
+const checkUser = (userParams) => {
+  if (!checkEmail(userParams.email)) {
+    return { data: null, error: 'no user in database' };
+  }
+  if (!checkPass(userParams.password)) {
+    return { data: null, error: 'wrong password' };
+  }
+  if (checkEmail(userParams.email) && checkPass(userParams.password)) {
+    return checkPass(userParams.password);
+  }
 };
