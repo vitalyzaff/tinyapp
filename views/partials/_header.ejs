@@ -19,7 +19,14 @@
           <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         </div>
       </div>
-            <% if(!username) { %> 
+            <% if(user_id) { %> 
+              <form method='POST' action="/logout">
+                <div class="input-group mt-3 mb-3">
+                  <p class='text-light pr-2'>Logged in as <%= user_id.email %></p>
+            <input class="btn btn-outline-light btn-sm" type="submit" value='Logout'>
+          </div>
+        </form>
+              <% } else { %>           
               <form method='POST' action="/login">
                 <div class="input-group mt-3 mb-3">
                   <input type="text" class="form-control" name="username" placeholder="Username">
@@ -28,13 +35,6 @@
                   </div>
                 </div>
               </form>
-              <% } else { %>           
-                <form method='POST' action="/logout">
-                  <div class="input-group mt-3 mb-3">
-                    <p class='text-light pr-2'>Logged in as <%= username %></p>
-              <input class="btn btn-outline-light btn-sm" type="submit" value='Logout'>
-            </div>
-            </form>
             <% } %> 
     </nav>
   </header>
