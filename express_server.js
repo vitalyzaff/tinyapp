@@ -3,9 +3,8 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 const bodyParser = require('body-parser');
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
 const cookieSession = require('cookie-session');
+const { generateRandomString, checkEmail, checkPass, createUser, urlsForUser } = require('./helpers');
 
 // set ejs as a view engine & set body parser
 app.set("view engine", "ejs");
@@ -20,7 +19,6 @@ const urlDatabase = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
-console.log(urlDatabase[0]);
 
 // users database
 const usersDb = {
@@ -53,7 +51,7 @@ app.get('/urls', (req, res) => {
   if (!id) {
     res.redirect('/login');
   }
-  const usrURLs = urlsForUser(id);
+  const usrURLs = urlsForUser(id, urlDatabase);
   const templateVars = { userID: usersDb[id], urls: usrURLs };
   res.render('urls_index', templateVars);
 });
@@ -64,7 +62,6 @@ app.post('/urls', (req, res) => {
   const longURL = req.body['longURL'];
   const userID = req.session['userID'];
   urlDatabase[randomString] = { longURL, userID };
-  console.log(urlDatabase);
   res.redirect(`/urls/${randomString}`);
 });
 
@@ -91,7 +88,6 @@ app.get('/urls/:shortURL', (req, res) => {
   const id = req.session['userID'];
   const templateVars = { userID: usersDb[id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render('urls_show', templateVars);
-  // res.redirect("/urls");
 });
 
 // delete an object key
@@ -110,9 +106,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 // update the link and redirect to main page
 app.post('/urls/:shortURL/edit', (req, res) => {
   const id = req.session['userID'];
-  console.log(id);
   const { shortURL } = req.params;
-  console.log(shortURL);
   if (id !== urlDatabase[shortURL]['userID']) {
     res.status(400);
     res.send('not authorized');
@@ -145,12 +139,11 @@ app.get('/register', (req, res) => {
 // submit registration form
 app.post('/register', (req, res) => {
   const randomID = generateRandomString();
-  const result = createUser({ id: randomID, email: req.body['email'], password: req.body['password'] }, randomID);
+  const result = createUser({ id: randomID, email: req.body['email'], password: req.body['password'] }, usersDb);
   if (result.error) {
     res.status(400);
     res.send(result.error);
   }
-  console.log(usersDb);
   req.session['userID'] = randomID;
   res.redirect('/urls');
 });
@@ -164,14 +157,14 @@ app.get('/login', (req, res) => {
 
 // sumbit login info
 app.post('/login', (req,res) => {
-  if (!checkEmail(req.body['email'])) {
+  if (!checkEmail(req.body['email'], usersDb)) {
     res.status(403);
     res.send('no email in the system');
-  } else if (!checkPass(req.body['password'])) {
+  } else if (!checkPass(req.body['password'], usersDb)) {
     res.status(403);
     res.send('wrong password, please try again');
   } else {
-    let fetchID = checkPass(req.body['password']);
+    let fetchID = checkPass(req.body['password'], usersDb);
     req.session['userID'] = fetchID;
     res.redirect('/urls');
   }
@@ -185,90 +178,3 @@ app.post('/login', (req,res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-
-// ***************************************************** HELPER FUNCTIONS *******************************************************************
-
-// generating random AlphaNumeric string
-const generateRandomString = function() {
-  const random = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  let arr = [];
-  for (let i = 0; i < 6; i++) {
-    arr.push(random[Math.floor(Math.random() * random.length)]);
-  }
-  arr = arr.join('');
-  return arr;
-};
-
-
-//
-const checkEmail = (email) => {
-  const objArr = Object.values(usersDb);
-  for (const user of objArr) {
-    if (user.email === email) {
-      return user;
-    }
-  }
-  return null;
-};
-
-const checkPass = (password) => {
-  const objArr = Object.values(usersDb);
-  for (const user of objArr) {
-    if (bcrypt.compareSync(password, user.password)) {
-      return user.id;
-    }
-  }
-  return null;
-};
-
-
-const createUser = (userParams) => {
-  const newObj = userParams;
-  if (checkEmail(newObj.email)) {
-    return { data: null, error: "user already exists" };
-  }
-  const { id, email, password } = newObj;
-  if (!email || !id || !password) {
-    return { data: null, error: "invalid fields" };
-  }
-  newObj.password = bcrypt.hashSync(newObj.password, saltRounds);
-  usersDb[id] = newObj;
-  return { data: newObj, error: null };
-};
-
-
-const urlsForUser = (id) => {
-  const usrURLs = {};
-  const objArr = Object.values(urlDatabase);
-  for (let i of objArr) {
-    if (i.userID === id) {
-      let shortURL = Object.keys(urlDatabase).find(key => urlDatabase[key] === i);
-      usrURLs[shortURL] = urlDatabase[shortURL]['longURL'];
-    }
-  }
-  return usrURLs;
-};
-
-
-// const urlDatabase = {
-//   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-//   b6UdxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-//   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48l" }
-// };
-
-// // const longURL = {longURL: "https://www.tn.ca"};
-// // const shortURL = 'b6UTxQ'
-// // urlDatabase[shortURL] = longURL;
-// const longURL = 'apple.ca';
-// const obj = {};
-// obj.url = {longURL};
-// console.log(obj);
-
-// const objArr = Object.values(urlDatabase);
-// for (let i of objArr){
-//   if(i.userID === 'aJ48lW'){
-//     const shortURL = Object.keys(urlDatabase).find(key => urlDatabase[key] === i)
-//     console.log(urlDatabase[shortURL]['longURL'])
-//   }
-//
