@@ -83,7 +83,10 @@ app.get('/urls/new', (req, res) => {
 
 // second route and handler to pass in long url and return its shortened form
 app.get('/urls/:shortURL', (req, res) => {
-  res.redirect("/urls");
+  const id = req.cookies['userID'];
+  const templateVars = { userID: usersDb[id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  res.render('urls_show', templateVars);
+  // res.redirect("/urls");
 });
 
 // delete an object key
@@ -117,7 +120,6 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 // link to edit particular link
 app.post('/urls/:shortURL/', (req, res) => {
   const id = req.cookies['userID'];
-  const usrURLs = urlsForUser(id);
   const templateVars = { userID: usersDb[id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render('urls_show', templateVars);
 });
@@ -255,7 +257,6 @@ const urlsForUser = (id) => {
 // const obj = {};
 // obj.url = {longURL};
 // console.log(obj);
-
 
 // const objArr = Object.values(urlDatabase);
 // for (let i of objArr){
