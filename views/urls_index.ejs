@@ -22,10 +22,10 @@
         </tr>
       </thead>
       <tbody>
-        <% for(let url in urls) { %>
+        <% for(let url of Object.keys(urls)) { %>
           <tr>
             <td><%= url %></td>
-            <td><%= urls[url] %></td>
+            <td><%= urls[url]['longURL'] %></td>
             <td><form method="POST" action="/urls/<%=url%>"><input type='submit' class='btn btn-outline-primary' value='EDIT'></form></td>
         <td><form method="POST" action="/urls/<%=url%>/delete"><input type='submit' class='btn btn-outline-danger' value='DELETE'></form></td>
           </tr>
