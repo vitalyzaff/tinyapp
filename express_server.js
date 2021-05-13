@@ -4,6 +4,10 @@ const app = express();
 const PORT = 8080;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+// const password = "purple-monkey-dinosaur";
+// const hashedPassword = bcrypt.hashSync(password, 10);
 
 // set ejs as a view engine & set body parser
 app.set("view engine", "ejs");
@@ -210,7 +214,7 @@ const checkEmail = (email) => {
 const checkPass = (password) => {
   const objArr = Object.values(usersDb);
   for (const user of objArr) {
-    if (user.password === password) {
+    if (bcrypt.compareSync(password, user.password)) {
       return user.id;
     }
   }
@@ -218,16 +222,18 @@ const checkPass = (password) => {
 };
 
 
-const createUser = (userParams, userID) => {
-  if (checkEmail(userParams.email)) {
+const createUser = (userParams) => {
+  const newObj = userParams;
+  if (checkEmail(newObj.email)) {
     return { data: null, error: "user already exists" };
   }
-  const { id, email, password } = userParams;
+  const { id, email, password } = newObj;
   if (!email || !id || !password) {
     return { data: null, error: "invalid fields" };
   }
-  usersDb[id] = userParams;
-  return { data: userParams, error: null };
+  newObj.password = bcrypt.hashSync(newObj.password, saltRounds);
+  usersDb[id] = newObj;
+  return { data: newObj, error: null };
 };
 
 
