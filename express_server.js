@@ -6,9 +6,13 @@ const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const { generateRandomString, checkEmail, checkPass, createUser, urlsForUser } = require('./helpers');
 
-// set ejs as a view engine & set body parser
+// set ejs as a view engine
 app.set("view engine", "ejs");
+
+// body parser middleware
 app.use(bodyParser.urlencoded({extended: true}));
+
+// cookie session middleware
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
@@ -36,16 +40,14 @@ const usersDb = {
 
 // *****************************************************************************************************************************************
 
+
+// redirect to urls page
 app.get('/', (req,res) => {
   res.redirect('/urls');
 });
 
 
-app.get('/urls.json', (req, res) => {
-  res.json(urlDatabase);
-});
-
-// new route handler for /urls
+// if not logged in, redirects to login page
 app.get('/urls', (req, res) => {
   const id = req.session['userID'];
   if (!id) {
@@ -56,7 +58,7 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
-// route definition for form submission
+// route definition for url submission
 app.post('/urls', (req, res) => {
   let randomString = generateRandomString();
   const longURL = req.body['longURL'];
@@ -73,7 +75,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 
 
-// GET route to show the form
+// form to submit new link
 app.get('/urls/new', (req, res) => {
   const id = req.session['userID'];
   if (!id) {

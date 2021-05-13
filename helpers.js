@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
+
+// generate random string
 const generateRandomString = function() {
   const random = 'abcdefghijklmnopqrstuvwxyz0123456789';
   let arr = [];
@@ -11,7 +13,7 @@ const generateRandomString = function() {
   return arr;
 };
 
-
+// check if users email exists in db
 const checkEmail = (email, database) => {
   const objArr = Object.values(database);
   for (const user of objArr) {
@@ -22,6 +24,7 @@ const checkEmail = (email, database) => {
   return null;
 };
 
+// check if password matches for a specified user
 const checkPass = (password, database) => {
   const objArr = Object.values(database);
   for (const user of objArr) {
@@ -32,7 +35,7 @@ const checkPass = (password, database) => {
   return null;
 };
 
-
+// create new user object
 const createUser = (userParams, database) => {
   if (checkEmail(userParams.email, database)) {
     return { data: null, error: "user already exists" };
@@ -46,7 +49,7 @@ const createUser = (userParams, database) => {
   return { data: userParams, error: null };
 };
 
-
+// return urls of the user who created them
 const urlsForUser = (id, database) => {
   const usrURLs = {};
   const objArr = Object.values(database);
