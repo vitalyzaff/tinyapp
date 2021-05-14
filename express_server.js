@@ -19,13 +19,16 @@ app.use(cookieSession({
   keys: ['key1', 'key2']
 }));
 
-// url database in form of object
+// ************************************************************ URL DATABASE **********************************************************
+
 const urlDatabase = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
-// users database
+
+// ************************************************************ USER DATABASE **********************************************************
+
 const usersDb = {
   "userRandomID": {
     id: "userRandomID",
@@ -38,9 +41,6 @@ const usersDb = {
     password: "dishwasher-funk"
   }
 };
-
-// *****************************************************************************************************************************************
-
 
 // redirect to urls page
 app.get('/', (req,res) => {
@@ -173,9 +173,7 @@ app.post('/login', (req,res) => {
 });
 
 
-// *****************************************************************************************************************************************
-
-// set server listening on specified port
+// ****************************************************** SERVER LISTEN ON PORT 8080 ********************************************************
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
