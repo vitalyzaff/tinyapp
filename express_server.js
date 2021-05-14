@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const { generateRandomString, checkEmail, checkPass, createUser, urlsForUser } = require('./helpers');
 
+
 // set ejs as a view engine
 app.set("view engine", "ejs");
 
@@ -88,6 +89,10 @@ app.get('/urls/new', (req, res) => {
 // second route and handler to pass in long url and return its shortened form
 app.get('/urls/:shortURL', (req, res) => {
   const id = req.session['userID'];
+  const { shortURL } = req.params;
+  if (id !== urlDatabase[shortURL]['userID']) {
+    res.status(400).send('not authorized');
+  }
   const templateVars = { userID: usersDb[id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
   res.render('urls_show', templateVars);
 });
@@ -100,8 +105,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
     delete urlDatabase[shortURL];
     res.redirect('/urls');
   } else {
-    res.status(400);
-    res.send('not autorized');
+    res.status(400).send('not authorized');
   }
 });
 
@@ -110,8 +114,7 @@ app.post('/urls/:shortURL/edit', (req, res) => {
   const id = req.session['userID'];
   const { shortURL } = req.params;
   if (id !== urlDatabase[shortURL]['userID']) {
-    res.status(400);
-    res.send('not authorized');
+    res.status(400).send('not authorized');
   }
   const longURL = req.body['longURL'];
   urlDatabase[shortURL] =  { longURL, userID: id };
@@ -128,7 +131,7 @@ app.post('/urls/:shortURL/', (req, res) => {
 // user logout
 app.post('/logout', (req, res) => {
   req.session = null;
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 // registration page
@@ -143,8 +146,7 @@ app.post('/register', (req, res) => {
   const randomID = generateRandomString();
   const result = createUser({ id: randomID, email: req.body['email'], password: req.body['password'] }, usersDb);
   if (result.error) {
-    res.status(400);
-    res.send(result.error);
+    res.status(400).send(result.error);
   }
   req.session['userID'] = randomID;
   res.redirect('/urls');
@@ -160,11 +162,9 @@ app.get('/login', (req, res) => {
 // sumbit login info
 app.post('/login', (req,res) => {
   if (!checkEmail(req.body['email'], usersDb)) {
-    res.status(403);
-    res.send('no email in the system');
+    res.status(403).send('no email in the system');
   } else if (!checkPass(req.body['password'], usersDb)) {
-    res.status(403);
-    res.send('wrong password, please try again');
+    res.status(403).send('wrong password, please try again');
   } else {
     let fetchID = checkPass(req.body['password'], usersDb);
     req.session['userID'] = fetchID;
