@@ -18,7 +18,7 @@ const checkEmail = (email, database) => {
   const objArr = Object.values(database);
   for (const user of objArr) {
     if (user.email === email) {
-      return user;
+      return user.id;
     }
   }
   return null;

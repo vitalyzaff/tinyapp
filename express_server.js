@@ -104,9 +104,8 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   if (id === urlDatabase[shortURL]['userID']) {
     delete urlDatabase[shortURL];
     res.redirect('/urls');
-  } else {
-    res.status(400).send('not authorized');
   }
+  res.status(400).send('not authorized');
 });
 
 // update the link and redirect to main page
@@ -165,8 +164,8 @@ app.post('/login', (req,res) => {
     res.status(403).send('no email in the system');
   } else if (!checkPass(req.body['password'], usersDb)) {
     res.status(403).send('wrong password, please try again');
-  } else {
-    let fetchID = checkPass(req.body['password'], usersDb);
+  } else if (checkEmail(req.body['email'], usersDb) && checkPass(req.body['password'], usersDb)) {
+    let fetchID = checkEmail(req.body['email'], usersDb);
     req.session['userID'] = fetchID;
     res.redirect('/urls');
   }
